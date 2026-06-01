@@ -50,7 +50,7 @@ resource "vault_terraform_cloud_secret_role" "team_token" {
   count        = var.tfe_token != "" && var.github_repository != "" && var.tfe_organization != "" ? 1 : 0
   namespace    = vault_namespace.demo.path_fq
   backend      = vault_terraform_cloud_secret_backend.tfe[0].backend
-  name         = var.github_repository
+  name         = lower(var.github_repository)
   organization = var.tfe_organization
   team_id      = tfe_team.workflow[0].id
 }
@@ -62,7 +62,7 @@ resource "vault_terraform_cloud_secret_role" "team_token" {
 resource "vault_policy" "github_actions" {
   count     = var.github_repository != "" && var.tfe_token != "" && var.tfe_organization != "" ? 1 : 0
   namespace = vault_namespace.demo.path_fq
-  name      = "github-actions-${var.github_repository}"
+  name      = "github-actions-${lower(var.github_repository)}"
   policy    = <<EOTT
 path "${vault_terraform_cloud_secret_backend.tfe[0].backend}/creds/${vault_terraform_cloud_secret_role.team_token[0].name}" {
   capabilities = ["read"]
@@ -87,7 +87,7 @@ resource "vault_jwt_auth_backend_role" "github_actions" {
   count           = var.github_repository != "" && var.github_repository_owner != "" && var.tfe_token != "" && var.tfe_organization != "" ? 1 : 0
   namespace       = vault_namespace.demo.path_fq
   backend         = vault_jwt_auth_backend.github[0].path
-  role_name       = var.github_repository
+  role_name       = lower(var.github_repository)
   role_type       = "jwt"
   bound_audiences = ["vault.workload.identity"]
   token_policies  = [vault_policy.github_actions[0].name]
