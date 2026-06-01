@@ -5,7 +5,8 @@ This project configures HashiCorp Vault to enable the Terraform Enterprise (TFE)
 
 ## What This Demo Demonstrates
 
-This demo illustrates a secure, API-driven workflow where a GitHub Actions CI/CD pipeline dynamically requests access to an HCP Terraform workspace without relying on long-lived API tokens. By using HashiCorp Vault as an identity broker, GitHub Actions employs OIDC (JWT) to authenticate to Vault. Vault then securely generates an ephemeral HCP Terraform Team token via the Terraform Cloud secrets engine, strictly scoped to the repository's target workspace.
+This demo illustrates a secure, API-driven workflow where a GitHub Actions CI/CD pipeline dynamically requests access to an HCP Terraform workspace without relying on long-lived API tokens. By using HashiCorp Vault as an identity broker, GitHub Actions employs OIDC (JWT) to authenticate to Vault.
+Vault then securely generates an ephemeral HCP Terraform Team token via the Terraform Cloud secrets engine, strictly scoped to the repository's target workspace.
 
 ## Demo Components
 
@@ -17,6 +18,7 @@ This demo illustrates a secure, API-driven workflow where a GitHub Actions CI/CD
 
 **Vault:**
 Tokens executing this Terraform configuration require specific policies to configure the platform. The required capabilities include:
+
 - **Namespace Access:** `create`, `read`, `update`, `delete` on `sys/namespaces/*` to manage sub-namespaces.
 - **Secrets Engine Access:** `create`, `read`, `update`, `delete`, `sudo` on `sys/mounts/*` to enable and configure the secret engine.
 - **Auth Method Access:** `create`, `read`, `update`, `delete`, `sudo` on `sys/auth/*` to enable and configure the JWT auth method.
@@ -25,6 +27,7 @@ Tokens executing this Terraform configuration require specific policies to confi
 
 **HCP Terraform:**
 The token provided via the `tfe_token` variable requires specific Organization-level API permissions. In the HCP Terraform platform UI, this corresponds to:
+
 - **Manage Teams:** Required to create the TFE Team for the workflow.
 - **Manage Workspaces:** Required to read the target workspace and assign `write` (plan/apply) Team Access grants to it.
 
