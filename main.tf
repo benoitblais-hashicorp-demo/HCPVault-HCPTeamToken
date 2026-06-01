@@ -5,11 +5,13 @@
 resource "vault_namespace" "demo" {
   path = var.namespace_path
 }
+
 # ------------------------------------------------------------------------------
 # Terraform Cloud / Enterprise Secrets Engine
 # ------------------------------------------------------------------------------
 
 resource "vault_terraform_cloud_secret_backend" "tfe" {
+  count       = var.tfe_token != "" ? 1 : 0
   namespace   = vault_namespace.demo.path_fq
   backend     = var.tfe_backend_path
   description = "TFE secrets engine to manage HCP Terraform Team tokens dynamically"
@@ -21,19 +23,22 @@ resource "vault_terraform_cloud_secret_backend" "tfe" {
 # ------------------------------------------------------------------------------
 
 resource "tfe_team" "workflow" {
+  count        = var.github_repository != "" && var.tfe_organization != "" ? 1 : 0
   name         = var.github_repository
   organization = var.tfe_organization
   visibility   = "secret"
 }
 
 data "tfe_workspace" "target" {
+  count        = var.github_repository != "" && var.tfe_organization != "" ? 1 : 0
   name         = var.github_repository
   organization = var.tfe_organization
 }
 
 resource "tfe_team_access" "workflow" {
-  team_id      = tfe_team.workflow.id
-  workspace_id = data.tfe_workspace.target.id
+  count        = var.github_repository != "" && var.tfe_organization != "" ? 1 : 0
+  team_id      = tfe_team.workflow[0].id
+  workspace_id = data.tfe_workspace.target[0].id
   access       = "write"
 }
 
@@ -42,11 +47,12 @@ resource "tfe_team_access" "workflow" {
 # ------------------------------------------------------------------------------
 
 resource "vault_terraform_cloud_secret_role" "team_token" {
+  count        = var.tfe_token != "" && var.github_repository != "" && var.tfe_organization != "" ? 1 : 0
   namespace    = vault_namespace.demo.path_fq
-  backend      = vault_terraform_cloud_secret_backend.tfe.backend
+  backend      = vault_terraform_cloud_secret_backend.tfe[0].backend
   name         = var.github_repository
   organization = var.tfe_organization
-  team_id      = tfe_team.workflow.id
+  team_id      = tfe_team.workflow[0].id
 }
 
 # ------------------------------------------------------------------------------
@@ -54,13 +60,14 @@ resource "vault_terraform_cloud_secret_role" "team_token" {
 # ------------------------------------------------------------------------------
 
 resource "vault_policy" "github_actions" {
+  count     = var.github_repository != "" && var.tfe_token != "" && var.tfe_organization != "" ? 1 : 0
   namespace = vault_namespace.demo.path_fq
   name      = "github-actions-${var.github_repository}"
-  policy    = <<EOT
-path "${vault_terraform_cloud_secret_backend.tfe.backend}/creds/${vault_terraform_cloud_secret_role.team_token.name}" {
+  policy    = <<EOTT
+path "${vault_terraform_cloud_secret_backend.tfe[0].backend}/creds/${vault_terraform_cloud_secret_role.team_token[0].name}" {
   capabilities = ["read"]
 }
-EOT
+EOTT
 }
 
 # ------------------------------------------------------------------------------
@@ -68,6 +75,7 @@ EOT
 # ------------------------------------------------------------------------------
 
 resource "vault_jwt_auth_backend" "github" {
+  count              = var.github_repository_owner != "" ? 1 : 0
   namespace          = vault_namespace.demo.path_fq
   path               = var.jwt_backend_path
   type               = "jwt"
@@ -76,11 +84,12 @@ resource "vault_jwt_auth_backend" "github" {
 }
 
 resource "vault_jwt_auth_backend_role" "github_actions" {
+  count          = var.github_repository != "" && var.github_repository_owner != "" && var.tfe_token != "" && var.tfe_organization != "" ? 1 : 0
   namespace      = vault_namespace.demo.path_fq
-  backend        = vault_jwt_auth_backend.github.path
+  backend        = vault_jwt_auth_backend.github[0].path
   role_name      = var.github_repository
   role_type      = "jwt"
-  token_policies = [vault_policy.github_actions.name]
+  token_policies = [vault_policy.github_actions[0].name]
 
   bound_claims = {
     repository = "${var.github_repository_owner}/${var.github_repository}"
