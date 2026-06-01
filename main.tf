@@ -84,12 +84,13 @@ resource "vault_jwt_auth_backend" "github" {
 }
 
 resource "vault_jwt_auth_backend_role" "github_actions" {
-  count          = var.github_repository != "" && var.github_repository_owner != "" && var.tfe_token != "" && var.tfe_organization != "" ? 1 : 0
-  namespace      = vault_namespace.demo.path_fq
-  backend        = vault_jwt_auth_backend.github[0].path
-  role_name      = var.github_repository
-  role_type      = "jwt"
-  token_policies = [vault_policy.github_actions[0].name]
+  count           = var.github_repository != "" && var.github_repository_owner != "" && var.tfe_token != "" && var.tfe_organization != "" ? 1 : 0
+  namespace       = vault_namespace.demo.path_fq
+  backend         = vault_jwt_auth_backend.github[0].path
+  role_name       = var.github_repository
+  role_type       = "jwt"
+  bound_audiences = ["vault.workload.identity"]
+  token_policies  = [vault_policy.github_actions[0].name]
 
   bound_claims = {
     repository = "${var.github_repository_owner}/${var.github_repository}"
