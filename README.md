@@ -76,35 +76,27 @@ No modules.
 
 ## Required Inputs
 
-The following input variables are required:
-
-### <a name="input_github_repository"></a> [github\_repository](#input\_github\_repository)
-
-Description: (Required) The name of the GitHub repository. Used to name the TFE team, Vault role, and lookup the TFE workspace.
-
-Type: `string`
-
-### <a name="input_github_repository_owner"></a> [github\_repository\_owner](#input\_github\_repository\_owner)
-
-Description: (Required) The owner (user or organization) of the GitHub repository (e.g. benoitblais-hashicorp-demo).
-
-Type: `string`
-
-### <a name="input_tfe_organization"></a> [tfe\_organization](#input\_tfe\_organization)
-
-Description: (Required) The HCP Terraform organization name.
-
-Type: `string`
-
-### <a name="input_tfe_token"></a> [tfe\_token](#input\_tfe\_token)
-
-Description: (Required) The HCP Terraform / TFE API token used to configure the secrets engine.
-
-Type: `string`
+No required inputs.
 
 ## Optional Inputs
 
 The following input variables are optional (have default values):
+
+### <a name="input_github_repository"></a> [github\_repository](#input\_github\_repository)
+
+Description: (Optional) The name of the GitHub repository. Used to name the TFE team, Vault role, and lookup the TFE workspace. If not provided, GitHub-specific resources won't be created.
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_github_repository_owner"></a> [github\_repository\_owner](#input\_github\_repository\_owner)
+
+Description: (Optional) The owner (user or organization) of the GitHub repository (e.g. benoitblais-hashicorp-demo).
+
+Type: `string`
+
+Default: `""`
 
 ### <a name="input_jwt_backend_path"></a> [jwt\_backend\_path](#input\_jwt\_backend\_path)
 
@@ -129,6 +121,22 @@ Description: (Optional) The path where the Terraform Cloud secrets engine will b
 Type: `string`
 
 Default: `"terraform"`
+
+### <a name="input_tfe_organization"></a> [tfe\_organization](#input\_tfe\_organization)
+
+Description: (Optional) The HCP Terraform organization name.
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_tfe_token"></a> [tfe\_token](#input\_tfe\_token)
+
+Description: (Optional) The HCP Terraform / TFE API token used to configure the secrets engine. If not provided, the TFE secrets engine won't be created.
+
+Type: `string`
+
+Default: `""`
 
 ## Resources
 
